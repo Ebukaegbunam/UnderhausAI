@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 
 export default function Dashboard() {
@@ -28,13 +28,13 @@ export default function Dashboard() {
 
       {/* nav */}
       <nav style={{ height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(26,24,20,0.08)', padding: '0 32px', background: 'rgba(250,247,242,0.9)', backdropFilter: 'blur(12px)', position: 'sticky', top: 0, zIndex: 50 }}>
-        <a href="#" style={{ display: 'flex', alignItems: 'center', gap: 10, color: '#1A1814' }}>
+        <Link to="/dashboard" style={{ display: 'flex', alignItems: 'center', gap: 10, color: '#1A1814' }}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
             <path d="M3 10 L12 2 L21 10 L21 22 L3 22 Z" stroke="currentColor" strokeWidth="1.75" strokeLinejoin="round"/>
             <line x1="3" y1="14.5" x2="21" y2="14.5" stroke="currentColor" strokeWidth="1.75"/>
           </svg>
           <span style={{ fontFamily: "'Instrument Serif', serif", fontSize: 22, letterSpacing: '-0.015em' }}>Underhaus</span>
-        </a>
+        </Link>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           {user.avatar_url && (
