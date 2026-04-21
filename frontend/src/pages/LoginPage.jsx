@@ -1,6 +1,5 @@
-import { Link } from 'react-router-dom'
-
 const API = import.meta.env.VITE_API_URL ?? 'http://localhost:8001'
+const LANDING = import.meta.env.VITE_LANDING_URL ?? 'http://localhost:3001'
 
 function GoogleIcon() {
   return (
@@ -27,13 +26,13 @@ export default function LoginPage() {
 
       {/* nav */}
       <nav style={{ height: 72, display: 'flex', alignItems: 'center', borderBottom: '1px solid rgba(26,24,20,0.08)', padding: '0 32px' }}>
-        <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 10, color: '#1A1814' }}>
+        <a href={LANDING} style={{ display: 'flex', alignItems: 'center', gap: 10, color: '#1A1814' }}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
             <path d="M3 10 L12 2 L21 10 L21 22 L3 22 Z" stroke="currentColor" strokeWidth="1.75" strokeLinejoin="round"/>
             <line x1="3" y1="14.5" x2="21" y2="14.5" stroke="currentColor" strokeWidth="1.75"/>
           </svg>
           <span style={{ fontFamily: "'Instrument Serif', serif", fontSize: 22, letterSpacing: '-0.015em' }}>Underhaus</span>
-        </Link>
+        </a>
       </nav>
 
       {/* main */}
