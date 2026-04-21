@@ -8,7 +8,13 @@ DATABASE_URL = os.getenv(
     "sqlite+aiosqlite:///./data/underhaus.db"
 )
 
-_connect_args = {"check_same_thread": False} if "sqlite" in DATABASE_URL else {}
+if "sqlite" in DATABASE_URL:
+    _connect_args = {"check_same_thread": False}
+elif "asyncpg" in DATABASE_URL:
+    # Supabase transaction pooler doesn't support prepared statements
+    _connect_args = {"statement_cache_size": 0}
+else:
+    _connect_args = {}
 
 engine = create_async_engine(
     DATABASE_URL,
