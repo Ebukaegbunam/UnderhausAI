@@ -98,7 +98,7 @@ UnderhausAI/
 
 After every session, Claude must update `memory/` with a dated file:
 
-- Filename: `memory/YYYY-MM-DD.md`
+- Filename: `uniqueId-memory/YYYY-MM-DD.md`
 - If the file for today already exists, append to it — do not create a duplicate
 - Each entry should summarize: what was built or changed, why, and any decisions made
 - Keep entries concise — a future agent should be able to read the full folder in under 5 minutes and understand the complete project history

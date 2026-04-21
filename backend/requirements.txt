@@ -5,3 +5,9 @@ httpx
 geopy
 pytest
 pytest-asyncio
+authlib
+python-jose[cryptography]
+sqlalchemy[asyncio]
+aiosqlite
+asyncpg
+itsdangerous
