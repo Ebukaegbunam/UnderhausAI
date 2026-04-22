@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { api } from '../api/client'
 import ProfilePanel from '../components/ProfilePanel'
@@ -12,7 +12,7 @@ const LANDING = import.meta.env.VITE_LANDING_URL ?? 'http://localhost:3001'
 const DEFAULT_PROFILE = {
   down_payment_pct: 20,
   annual_income: null,
-  credit_range: '720-759',
+  credit_score: 740,
   investment_goal: 'buy_and_hold',
   monthly_debt_payments: 0,
   vacancy_rate_pct: 8,
@@ -21,6 +21,32 @@ const DEFAULT_PROFILE = {
   capex_pct: 5,
   target_cash_on_cash_pct: 8,
 }
+
+function scoreToCreditRange(score) {
+  if (score >= 760) return '760+'
+  if (score >= 720) return '720-759'
+  if (score >= 680) return '680-719'
+  return 'below_680'
+}
+
+const PRICE_OPTIONS = [
+  { label: 'No limit', value: '' },
+  { label: '$50K', value: 50000 },
+  { label: '$75K', value: 75000 },
+  { label: '$100K', value: 100000 },
+  { label: '$125K', value: 125000 },
+  { label: '$150K', value: 150000 },
+  { label: '$175K', value: 175000 },
+  { label: '$200K', value: 200000 },
+  { label: '$250K', value: 250000 },
+  { label: '$300K', value: 300000 },
+  { label: '$400K', value: 400000 },
+  { label: '$500K', value: 500000 },
+  { label: '$750K', value: 750000 },
+  { label: '$1M', value: 1000000 },
+  { label: '$1.5M', value: 1500000 },
+  { label: '$2M+', value: 2000000 },
+]
 
 const PROPERTY_TYPE_OPTIONS = [
   { label: 'Multi-Family', value: 'MultiFamily' },
@@ -105,19 +131,31 @@ export default function Dashboard() {
     setProfileSaved(true)
   }, [profile])
 
-  const buildSearchPayload = useCallback((loc = location) => ({
-    location: loc,
-    radius_miles: radiusMiles,
-    property_types: [propertyType],
-    status: 'ForSale',
-    min_price: minPrice ? Number(minPrice) : null,
-    max_price: maxPrice ? Number(maxPrice) : null,
-    max_results: 50,
-    user_profile: profileSaved ? {
-      ...profile,
+  const buildSearchPayload = useCallback((loc = location) => {
+    const isCash = profile.down_payment_pct >= 100
+    const user_profile = profileSaved ? {
+      down_payment_pct: isCash ? 50 : profile.down_payment_pct,
       annual_income: profile.annual_income || null,
-    } : null,
-  }), [location, radiusMiles, propertyType, minPrice, maxPrice, profile, profileSaved])
+      credit_range: scoreToCreditRange(profile.credit_score ?? 740),
+      investment_goal: profile.investment_goal,
+      monthly_debt_payments: profile.monthly_debt_payments,
+      vacancy_rate_pct: profile.vacancy_rate_pct,
+      management_fee_pct: profile.management_fee_pct,
+      maintenance_pct: profile.maintenance_pct,
+      capex_pct: profile.capex_pct,
+      target_cash_on_cash_pct: profile.target_cash_on_cash_pct,
+    } : null
+    return {
+      location: loc,
+      radius_miles: radiusMiles,
+      property_types: [propertyType],
+      status: 'ForSale',
+      min_price: minPrice ? Number(minPrice) : null,
+      max_price: maxPrice ? Number(maxPrice) : null,
+      max_results: 50,
+      user_profile,
+    }
+  }, [location, radiusMiles, propertyType, minPrice, maxPrice, profile, profileSaved])
 
   const runSearch = useCallback(async (loc = location) => {
     if (!loc.trim()) return
@@ -283,12 +321,23 @@ export default function Dashboard() {
                 </select>
               ))}
 
-              <input placeholder="Min $" value={minPrice} onChange={e => setMinPrice(e.target.value.replace(/\D/g, ''))}
-                style={{ width: 90, padding: '8px 10px', fontSize: 13, border: '1px solid rgba(26,24,20,0.12)', borderRadius: 6, background: '#FAF7F2', color: '#1A1814', outline: 'none' }}
-                onFocus={e => e.target.style.borderColor = '#1A1814'} onBlur={e => e.target.style.borderColor = 'rgba(26,24,20,0.12)'} />
-              <input placeholder="Max $" value={maxPrice} onChange={e => setMaxPrice(e.target.value.replace(/\D/g, ''))}
-                style={{ width: 90, padding: '8px 10px', fontSize: 13, border: '1px solid rgba(26,24,20,0.12)', borderRadius: 6, background: '#FAF7F2', color: '#1A1814', outline: 'none' }}
-                onFocus={e => e.target.style.borderColor = '#1A1814'} onBlur={e => e.target.style.borderColor = 'rgba(26,24,20,0.12)'} />
+              {[
+                { label: 'Min price', value: minPrice, onChange: setMinPrice },
+                { label: 'Max price', value: maxPrice, onChange: setMaxPrice },
+              ].map(({ label, value, onChange }) => (
+                <select key={label} value={value} onChange={e => onChange(e.target.value)}
+                  style={{
+                    padding: '8px 28px 8px 10px', fontSize: 13,
+                    border: '1px solid rgba(26,24,20,0.12)', borderRadius: 6,
+                    background: '#FAF7F2', color: value ? '#1A1814' : '#9A9288',
+                    appearance: 'none', cursor: 'pointer',
+                    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239A9288' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`,
+                    backgroundRepeat: 'no-repeat', backgroundPosition: 'right 8px center', outline: 'none',
+                  }}>
+                  <option value="">{label}</option>
+                  {PRICE_OPTIONS.filter(o => o.value).map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                </select>
+              ))}
             </div>
           </div>
 
