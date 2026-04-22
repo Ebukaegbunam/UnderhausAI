@@ -18,6 +18,7 @@ from starlette.responses import Response
 logger = logging.getLogger("underhaus.request")
 
 SLOW_REQUEST_MS = 3000  # warn if request takes longer than this
+_SILENT_PATHS = {"/health", "/", "/favicon.ico"}  # suppress success logs for these
 
 
 class RequestTrackerMiddleware(BaseHTTPMiddleware):
@@ -61,7 +62,7 @@ class RequestTrackerMiddleware(BaseHTTPMiddleware):
             logger.error("Server error response", extra={**log_extra, "error_tag": "UH-REQ-002"})
         elif status >= 400:
             logger.warning("Client error response", extra={**log_extra, "error_tag": "UH-REQ-001"})
-        else:
+        elif request.url.path not in _SILENT_PATHS:
             logger.info("Request completed", extra=log_extra)
 
         response.headers["X-Request-ID"] = request_id

@@ -26,6 +26,8 @@ backend/data/
 .env.*.local
 .env.*
 *.env
+# .env.production only has public URLs/publishable keys — safe to commit
+!.env.production
 
 # ── Vercel ──────────────────────────────────────────────
 .vercel/
