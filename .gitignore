@@ -17,10 +17,14 @@ node_modules/
 dist/
 .cache/
 
+# ── Local data ──────────────────────────────────────────
+backend/data/
+
 # ── Secrets — NEVER commit these ────────────────────────
 .env
 .env.local
 .env.*.local
+.env.*
 *.env
 
 # ── Vercel ──────────────────────────────────────────────
