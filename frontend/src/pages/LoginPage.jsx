@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { auth, api } from '../api/client'
+import { auth, api, BASE_URL } from '../api/client'
 
-const API = import.meta.env.VITE_API_URL ?? 'http://localhost:8001'
-const LANDING = import.meta.env.VITE_LANDING_URL ?? 'http://localhost:3001'
+const API = BASE_URL
+const LANDING = import.meta.env.VITE_LANDING_URL
+  ?? (import.meta.env.DEV ? 'http://localhost:3001' : '/')
 const IS_DEV = import.meta.env.DEV
 
 function GoogleIcon() {

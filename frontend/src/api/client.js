@@ -1,4 +1,7 @@
-const BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8001'
+export const BASE_URL = import.meta.env.VITE_API_URL
+  ?? (import.meta.env.DEV ? 'http://localhost:8001' : '')
+
+const BASE = BASE_URL
 
 function getToken() {
   return localStorage.getItem('uh_token')

@@ -7,7 +7,8 @@ import ListingCard from '../components/ListingCard'
 import ListingDetail from '../components/ListingDetail'
 import ComingSoonModal from '../components/ComingSoonModal'
 
-const LANDING = import.meta.env.VITE_LANDING_URL ?? 'http://localhost:3001'
+const LANDING = import.meta.env.VITE_LANDING_URL
+  ?? (import.meta.env.DEV ? 'http://localhost:3001' : '/')
 
 const DEFAULT_PROFILE = {
   down_payment_pct: 20,
