@@ -1,5 +1,10 @@
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { auth } from '../api/client'
+
 const API = import.meta.env.VITE_API_URL ?? 'http://localhost:8001'
 const LANDING = import.meta.env.VITE_LANDING_URL ?? 'http://localhost:3001'
+const IS_DEV = import.meta.env.DEV
 
 function GoogleIcon() {
   return (
@@ -21,6 +26,25 @@ function GitHubIcon() {
 }
 
 export default function LoginPage() {
+  const navigate = useNavigate()
+  const [devLoading, setDevLoading] = useState(false)
+
+  const handleDevLogin = async () => {
+    setDevLoading(true)
+    try {
+      const res = await fetch(`${API}/auth/dev-login`, { method: 'POST' })
+      const data = await res.json()
+      if (data.token) {
+        auth.setToken(data.token)
+        navigate('/dashboard', { replace: true })
+      }
+    } catch {
+      alert('Dev login failed — is the backend running?')
+    } finally {
+      setDevLoading(false)
+    }
+  }
+
   return (
     <div style={{ minHeight: '100vh', background: '#FAF7F2', display: 'flex', flexDirection: 'column' }}>
 
@@ -88,8 +112,34 @@ export default function LoginPage() {
             </a>
           </div>
 
-          {/* divider + fine print */}
-          <div style={{ marginTop: 32, textAlign: 'center' }}>
+          {/* Dev login — only visible in local dev */}
+          {IS_DEV && (
+            <div style={{ marginTop: 20 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+                <div style={{ flex: 1, height: 1, background: 'rgba(26,24,20,0.1)' }} />
+                <span style={{ fontSize: 11, color: '#9A9288', textTransform: 'uppercase', letterSpacing: '0.08em' }}>dev only</span>
+                <div style={{ flex: 1, height: 1, background: 'rgba(26,24,20,0.1)' }} />
+              </div>
+              <button
+                onClick={handleDevLogin}
+                disabled={devLoading}
+                style={{
+                  width: '100%', padding: '14px 20px',
+                  background: 'transparent', color: '#9A9288',
+                  border: '1px dashed rgba(26,24,20,0.2)',
+                  fontSize: 14, fontWeight: 500, cursor: devLoading ? 'not-allowed' : 'pointer',
+                  transition: 'all 200ms', opacity: devLoading ? 0.5 : 1,
+                }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = '#9A9288'; e.currentTarget.style.color = '#5C564E' }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(26,24,20,0.2)'; e.currentTarget.style.color = '#9A9288' }}
+              >
+                {devLoading ? 'Logging in…' : 'Continue as Dev User'}
+              </button>
+            </div>
+          )}
+
+          {/* fine print */}
+          <div style={{ marginTop: 24, textAlign: 'center' }}>
             <p style={{ color: '#9A9288', fontSize: 13, lineHeight: 1.6 }}>
               By continuing you agree to our terms of service.<br/>
               No credit card required.

@@ -133,7 +133,7 @@ async def oauth_login(provider: str, request: Request):
         raise HTTPException(status_code=400, detail=f"Unsupported provider: {provider}")
     redirect_uri = f"{API_BASE_URL}/auth/{provider}/callback"
     client = oauth.create_client(provider)
-    return await client.authorize_redirect(request, redirect_uri)
+    return await client.authorize_redirect(request, redirect_uri, response_type="code")
 
 
 @router.get("/{provider}/callback", summary="OAuth callback — do not call directly")
@@ -224,6 +224,28 @@ async def logout(
     except JWTError:
         pass  # Token already invalid — logout is a no-op
     return {"status": "logged_out"}
+
+
+@router.post("/dev-login", summary="Dev-only login — disabled in production")
+async def dev_login(db: AsyncSession = Depends(get_db)):
+    """
+    Creates a dev test user and returns a JWT. Only works when DEV_MODE=true in .env.
+    Never expose this in production.
+    """
+    if os.getenv("DEV_MODE", "").lower() != "true":
+        raise HTTPException(status_code=403, detail="Dev login is disabled. Set DEV_MODE=true in .env to enable.")
+
+    user = await get_or_create_user(
+        db=db,
+        provider="dev",
+        provider_user_id="dev-user-001",
+        email="dev@underhaus.local",
+        name="Dev User",
+        avatar_url=None,
+    )
+    jwt_token, jti = create_access_token(user)
+    await save_session(db, user.id, jti)
+    return {"token": jwt_token}
 
 
 @router.delete("/me", summary="Delete account (soft delete — data is preserved)")
