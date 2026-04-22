@@ -1,17 +1,17 @@
 import os
+from dotenv import load_dotenv
+load_dotenv()  # must run before any module that reads env vars at import time
+
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
-from dotenv import load_dotenv
 
 from services.logger import setup_logging
 from middleware.request_tracker import RequestTrackerMiddleware
 from db.session import init_db
 from routes import listings, health, auth
-
-load_dotenv()
 setup_logging(level=os.getenv("LOG_LEVEL", "INFO"))
 
 

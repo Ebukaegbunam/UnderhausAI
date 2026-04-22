@@ -188,6 +188,35 @@ export default function ProfilePanel({ user, profile, onChange, onSave, saved })
         </Field>
 
         <Field
+          label="Cash Available"
+          tooltip="Total cash you have set aside for the down payment. We'll use this to calculate your suggested max purchase price based on your down payment percentage."
+        >
+          <div style={{ position: 'relative' }}>
+            <span style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', fontSize: 13, color: '#9A9288', pointerEvents: 'none' }}>$</span>
+            <input
+              type="number"
+              min="0"
+              step="5000"
+              placeholder="e.g. 75000"
+              value={profile.cash_amount ?? ''}
+              onChange={e => onChange('cash_amount', e.target.value ? Number(e.target.value) : null)}
+              style={{
+                ...sel,
+                paddingLeft: 22,
+                backgroundImage: 'none',
+                width: '100%',
+                boxSizing: 'border-box',
+              }}
+            />
+          </div>
+          {profile.cash_amount && profile.down_payment_pct < 100 && (
+            <p style={{ fontSize: 11, color: '#2D5A3D', marginTop: 5 }}>
+              Suggested max: <strong>${Math.round(profile.cash_amount / (profile.down_payment_pct / 100)).toLocaleString()}</strong>
+            </p>
+          )}
+        </Field>
+
+        <Field
           label="Down Payment"
           tooltip="The upfront cash you put toward the purchase. Higher down payments reduce your loan amount and monthly mortgage costs."
         >

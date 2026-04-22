@@ -11,6 +11,7 @@ const LANDING = import.meta.env.VITE_LANDING_URL ?? 'http://localhost:3001'
 
 const DEFAULT_PROFILE = {
   down_payment_pct: 20,
+  cash_amount: null,
   annual_income: null,
   credit_score: 740,
   investment_goal: 'buy_and_hold',
@@ -20,6 +21,26 @@ const DEFAULT_PROFILE = {
   maintenance_pct: 5,
   capex_pct: 5,
   target_cash_on_cash_pct: 8,
+}
+
+const SEARCH_CACHE_TTL_MS = 30 * 60 * 1000 // 30 minutes
+
+function getSearchCacheKey(payload) {
+  return `uh_sc|${payload.location}|${payload.radius_miles}|${payload.property_types.join(',')}|${payload.min_price ?? ''}|${payload.max_price ?? ''}`
+}
+
+function readSearchCache(key) {
+  try {
+    const raw = localStorage.getItem(key)
+    if (!raw) return null
+    const { ts, data } = JSON.parse(raw)
+    if (Date.now() - ts > SEARCH_CACHE_TTL_MS) { localStorage.removeItem(key); return null }
+    return data
+  } catch { return null }
+}
+
+function writeSearchCache(key, data) {
+  try { localStorage.setItem(key, JSON.stringify({ ts: Date.now(), data })) } catch { /* storage full */ }
 }
 
 function scoreToCreditRange(score) {
@@ -117,6 +138,8 @@ export default function Dashboard() {
   const [deepUnderwriteListing, setDeepUnderwriteListing] = useState(null)
   const [historyOpen, setHistoryOpen] = useState(false)
 
+  useEffect(() => { document.title = 'Dashboard — Underhaus' }, [])
+
   useEffect(() => {
     if (!authLoading && !user) navigate('/login', { replace: true })
   }, [authLoading, user, navigate])
@@ -161,12 +184,22 @@ export default function Dashboard() {
     if (!loc.trim()) return
     setLoading(true)
     setError(null)
-    setResults(null)
 
     const payload = buildSearchPayload(loc)
+    const cacheKey = getSearchCacheKey(payload)
+    const cached = readSearchCache(cacheKey)
+
+    if (cached) {
+      setResults(cached)
+      setLoading(false)
+      return
+    }
+
+    setResults(null)
     try {
       const data = await api.post('/listings/search', payload)
       setResults(data)
+      writeSearchCache(cacheKey, data)
 
       const entry = { id: Date.now(), location: loc, timestamp: Date.now(), count: data.total_found, resolved: data.location_resolved }
       setHistory(h => {
@@ -198,13 +231,6 @@ export default function Dashboard() {
 
   return (
     <div style={{ minHeight: '100vh', background: '#FAF7F2', display: 'flex', flexDirection: 'column' }}>
-      <style>{`
-        @keyframes spin { to { transform: rotate(360deg); } }
-        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-        @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px) } to { opacity: 1; transform: none } }
-      `}</style>
-
       {/* Nav */}
       <nav style={{
         height: 56, display: 'flex', alignItems: 'center', justifyContent: 'space-between',
@@ -321,23 +347,54 @@ export default function Dashboard() {
                 </select>
               ))}
 
-              {[
-                { label: 'Min price', value: minPrice, onChange: setMinPrice },
-                { label: 'Max price', value: maxPrice, onChange: setMaxPrice },
-              ].map(({ label, value, onChange }) => (
-                <select key={label} value={value} onChange={e => onChange(e.target.value)}
+              {/* Min price */}
+              <select value={minPrice} onChange={e => setMinPrice(e.target.value)}
+                style={{
+                  padding: '8px 28px 8px 10px', fontSize: 13,
+                  border: '1px solid rgba(26,24,20,0.12)', borderRadius: 6,
+                  background: '#FAF7F2', color: minPrice ? '#1A1814' : '#9A9288',
+                  appearance: 'none', cursor: 'pointer',
+                  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239A9288' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`,
+                  backgroundRepeat: 'no-repeat', backgroundPosition: 'right 8px center', outline: 'none',
+                }}>
+                <option value="">Min price</option>
+                {PRICE_OPTIONS.filter(o => o.value).map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+              </select>
+
+              {/* Max price + suggested hint */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                <select value={maxPrice} onChange={e => setMaxPrice(e.target.value)}
                   style={{
                     padding: '8px 28px 8px 10px', fontSize: 13,
                     border: '1px solid rgba(26,24,20,0.12)', borderRadius: 6,
-                    background: '#FAF7F2', color: value ? '#1A1814' : '#9A9288',
+                    background: '#FAF7F2', color: maxPrice ? '#1A1814' : '#9A9288',
                     appearance: 'none', cursor: 'pointer',
                     backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239A9288' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`,
                     backgroundRepeat: 'no-repeat', backgroundPosition: 'right 8px center', outline: 'none',
                   }}>
-                  <option value="">{label}</option>
+                  <option value="">Max price</option>
                   {PRICE_OPTIONS.filter(o => o.value).map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                 </select>
-              ))}
+                {(() => {
+                  const cash = profile.cash_amount
+                  const pct = profile.down_payment_pct
+                  if (!cash || pct >= 100) return null
+                  const suggested = Math.round(cash / (pct / 100))
+                  return (
+                    <button
+                      onClick={() => {
+                        const closest = PRICE_OPTIONS.filter(o => o.value).reduce((a, b) =>
+                          Math.abs(b.value - suggested) < Math.abs(a.value - suggested) ? b : a
+                        )
+                        setMaxPrice(String(closest.value))
+                      }}
+                      style={{ fontSize: 11, color: '#2D5A3D', background: 'none', border: 'none', cursor: 'pointer', padding: 0, textAlign: 'left', whiteSpace: 'nowrap' }}
+                    >
+                      ↑ Use suggested: ${(suggested / 1000).toFixed(0)}K
+                    </button>
+                  )
+                })()}
+              </div>
             </div>
           </div>
 

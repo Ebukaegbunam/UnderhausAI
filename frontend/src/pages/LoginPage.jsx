@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { auth } from '../api/client'
+import { auth, api } from '../api/client'
 
 const API = import.meta.env.VITE_API_URL ?? 'http://localhost:8001'
 const LANDING = import.meta.env.VITE_LANDING_URL ?? 'http://localhost:3001'
@@ -28,6 +28,15 @@ function GitHubIcon() {
 export default function LoginPage() {
   const navigate = useNavigate()
   const [devLoading, setDevLoading] = useState(false)
+
+  useEffect(() => { document.title = 'Sign in — Underhaus' }, [])
+
+  useEffect(() => {
+    if (!auth.isLoggedIn()) return
+    api.get('/auth/me')
+      .then(() => navigate('/dashboard', { replace: true }))
+      .catch(() => auth.clearToken())
+  }, [navigate])
 
   const handleDevLogin = async () => {
     setDevLoading(true)

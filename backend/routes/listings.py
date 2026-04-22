@@ -1,21 +1,23 @@
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Optional
 from models.listing import ListingSearchRequest, ListingSearchResponse, ListingWithUnderwriting, UserProfile, DataSourceStatus
 from agents import listing_agent
 from agents.underwriting_engine import underwrite
 from scrapers import zillow_property
+from db.session import get_db
 
 router = APIRouter(prefix="/listings", tags=["listings"])
 
 
 @router.post("/search", response_model=ListingSearchResponse)
-async def search_listings(req: ListingSearchRequest):
+async def search_listings(req: ListingSearchRequest, db: AsyncSession = Depends(get_db)):
     """
     Search for listings within a radius of a zip code or address.
     Optionally include a user_profile to receive underwriting on each result.
     """
     try:
-        return await listing_agent.run(req)
+        return await listing_agent.run(req, db=db)
     except ValueError as e:
         raise HTTPException(status_code=422, detail=str(e))
     except Exception as e:
@@ -32,6 +34,7 @@ async def get_property(
     investment_goal: str = Query(default="buy_and_hold"),
     monthly_debt_payments: float = Query(default=0.0),
     target_cash_on_cash_pct: float = Query(default=8.0),
+    db: AsyncSession = Depends(get_db),
 ):
     """
     Fetch a single Zillow listing by address or Zillow URL, with underwriting.
@@ -74,7 +77,7 @@ async def get_property(
     )
 
     try:
-        result = await listing_agent.run(req)
+        result = await listing_agent.run(req, db=db)
     except ValueError as e:
         raise HTTPException(status_code=422, detail=str(e))
 

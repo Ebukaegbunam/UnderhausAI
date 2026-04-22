@@ -1,10 +1,12 @@
 """
 Listing Agent — Phase 1 orchestrator.
 
-Flow: geocode → scrape Zillow → (optionally) underwrite each listing → rank → return.
+Flow: geocode → scrape Zillow → save to Supabase → (optionally) underwrite each listing → rank → return.
 """
 import logging
 from typing import Optional
+
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from models.listing import (
     ListingSearchRequest,
@@ -17,6 +19,7 @@ from scrapers import zillow
 from agents.underwriting_engine import underwrite
 from services.geocoder import geocode
 from services.cache import listing_cache, geocode_cache
+from services.listing_service import upsert_listings
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +32,7 @@ def _cache_key(req: ListingSearchRequest) -> str:
     )
 
 
-async def run(req: ListingSearchRequest) -> ListingSearchResponse:
+async def run(req: ListingSearchRequest, db: Optional[AsyncSession] = None) -> ListingSearchResponse:
     # --- 1. Geocode ---
     geo_key = req.location.lower().strip()
     cached_geo = geocode_cache.get(geo_key)
@@ -64,6 +67,8 @@ async def run(req: ListingSearchRequest) -> ListingSearchResponse:
         )
         if src_status in (DataSourceStatus.ok, DataSourceStatus.mock):
             listing_cache.set(cache_key, (raw_listings, src_status, error_detail))
+        if db and src_status == DataSourceStatus.ok:
+            await upsert_listings(db, raw_listings)
 
     # --- 3. Underwrite each listing (if user_profile provided) ---
     results: list[ListingWithUnderwriting] = []

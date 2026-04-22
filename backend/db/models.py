@@ -84,3 +84,43 @@ class UserSession(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
     user: Mapped["User"] = relationship("User", back_populates="sessions")
+
+
+class Listing(Base):
+    """
+    Persisted Zillow listing. Upserted on every search so we accumulate inventory.
+    zpid is the Zillow property ID — the natural unique key.
+    """
+    __tablename__ = "listings"
+
+    zpid:          Mapped[str]           = mapped_column(String(36), primary_key=True)
+    address:       Mapped[str]           = mapped_column(String, nullable=False, index=True)
+    city:          Mapped[str]           = mapped_column(String, nullable=False)
+    state:         Mapped[str]           = mapped_column(String(2), nullable=False)
+    zip_code:      Mapped[str]           = mapped_column(String(10), nullable=False, index=True)
+
+    price:         Mapped[Optional[int]] = mapped_column(nullable=True)
+    beds:          Mapped[Optional[int]] = mapped_column(nullable=True)
+    baths:         Mapped[Optional[float]] = mapped_column(nullable=True)
+    sqft:          Mapped[Optional[int]] = mapped_column(nullable=True)
+    lot_sqft:      Mapped[Optional[int]] = mapped_column(nullable=True)
+    year_built:    Mapped[Optional[int]] = mapped_column(nullable=True)
+    property_type: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
+
+    lat:           Mapped[Optional[float]] = mapped_column(nullable=True)
+    lng:           Mapped[Optional[float]] = mapped_column(nullable=True)
+    distance_miles: Mapped[Optional[float]] = mapped_column(nullable=True)
+
+    zillow_url:    Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    image_url:     Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+
+    days_on_market:  Mapped[Optional[int]] = mapped_column(nullable=True)
+    price_per_sqft:  Mapped[Optional[int]] = mapped_column(nullable=True)
+    zestimate:       Mapped[Optional[int]] = mapped_column(nullable=True)
+    rent_zestimate:  Mapped[Optional[int]] = mapped_column(nullable=True)
+    hoa_fee:         Mapped[Optional[int]] = mapped_column(nullable=True)
+    annual_tax:      Mapped[Optional[int]] = mapped_column(nullable=True)
+    source:          Mapped[str]           = mapped_column(String(32), default="zillow", nullable=False)
+
+    first_seen_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+    last_seen_at:  Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now, onupdate=_now)
