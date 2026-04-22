@@ -18,24 +18,24 @@ const PRO = [
 
 export default function Pricing() {
   return (
-    <section id="pricing" className="pt-10 pb-[clamp(80px,14vh,160px)]">
-      <div className="max-w-[1280px] mx-auto px-8 relative z-[2]">
-        <div className="flex items-baseline gap-4 mb-12 pb-5 border-b border-[rgba(26,24,20,0.08)]">
+    <section id="pricing" className="pt-10 pb-[clamp(64px,14vh,160px)]">
+      <div className="max-w-[1280px] mx-auto px-4 md:px-8 relative z-[2]">
+        <div className="flex items-baseline gap-4 mb-10 md:mb-12 pb-5 border-b border-[rgba(26,24,20,0.08)]">
           <span className="text-xs font-medium tracking-widest uppercase text-[#5C564E] flex items-center">
             <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#1A1814] mr-2.5" />Pricing
           </span>
           <span className="font-mono text-[11px] text-[#9A9288] tracking-wider">03 / 04</span>
         </div>
 
-        <h2 className="reveal font-['Instrument_Serif'] text-[clamp(40px,5vw,64px)] leading-[1.04] tracking-[-0.01em] max-w-[800px] mb-12">
+        <h2 className="reveal font-['Instrument_Serif'] text-[clamp(36px,5vw,64px)] leading-[1.04] tracking-[-0.01em] max-w-[800px] mb-10 md:mb-12">
           Free to watch one market. <em className="italic">Pro</em> when you're actually shopping.
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-[rgba(26,24,20,0.08)] border border-[rgba(26,24,20,0.08)]">
           {/* starter */}
-          <div className="fade-up bg-[#FAF7F2] p-12 flex flex-col">
+          <div className="fade-up bg-[#FAF7F2] p-6 md:p-12 flex flex-col">
             <div className="font-mono text-[11px] tracking-widest uppercase text-[#9A9288] mb-7">Starter</div>
-            <div className="font-mono text-[56px] font-medium tracking-[-0.02em] leading-none mb-2">
+            <div className="font-mono text-[48px] md:text-[56px] font-medium tracking-[-0.02em] leading-none mb-2">
               $0<span className="text-base text-[#5C564E] font-normal tracking-normal">/mo</span>
             </div>
             <div className="font-['Instrument_Serif'] text-xl leading-[1.4] text-[#5C564E] mb-7">One market, one saved profile. See what a proper underwriting looks like.</div>
@@ -57,9 +57,9 @@ export default function Pricing() {
           </div>
 
           {/* pro */}
-          <div className="fade-up p-12 flex flex-col" style={{ background: '#1A1814', color: '#FAF7F2' }}>
+          <div className="fade-up p-6 md:p-12 flex flex-col" style={{ background: '#1A1814', color: '#FAF7F2' }}>
             <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'rgba(250,247,242,0.6)', marginBottom: 28 }}>Pro</div>
-            <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 56, fontWeight: 500, letterSpacing: '-0.02em', lineHeight: 1, marginBottom: 8 }}>
+            <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 'clamp(40px,7vw,56px)', fontWeight: 500, letterSpacing: '-0.02em', lineHeight: 1, marginBottom: 8 }}>
               $49.99<span style={{ fontSize: 16, color: 'rgba(250,247,242,0.6)', fontWeight: 400, letterSpacing: 0 }}>/mo</span>
             </div>
             <div style={{ fontFamily: "'Instrument Serif', serif", fontSize: 20, lineHeight: 1.4, color: 'rgba(250,247,242,0.7)', marginBottom: 28 }}>Unlimited markets, unlimited listings, real-time alerts the moment a deal hits the MLS.</div>

@@ -2,8 +2,9 @@ import { useEffect, useRef, useState } from 'react'
 import { animateNumber } from '../hooks/useCountUp'
 import AgentCard from './AgentCard'
 
+const APP_URL = import.meta.env.VITE_APP_URL ?? 'https://app.underhausai.com'
 const CALENDLY = 'https://calendly.com/ebukaegb1/underhaus-ai'
-const WORDS = ['An\u00a0', 'AI\u00a0', 'that\u00a0', 'underwrites\u00a0', 'every', null, 'listing\u00a0', 'before\u00a0', 'you\u00a0', 'tour.']
+const WORDS = ['An ', 'AI ', 'that ', 'underwrites ', 'every', null, 'listing ', 'before ', 'you ', 'tour.']
 
 export default function Hero() {
   const [wordStates, setWordStates] = useState(WORDS.map(() => false))
@@ -41,19 +42,19 @@ export default function Hero() {
   }, [])
 
   return (
-    <section id="top" className="min-h-screen flex flex-col justify-center pt-[184px] pb-24 relative">
-      <div className="max-w-[1280px] mx-auto px-8 relative z-[2] w-full">
-        <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_1fr] gap-20 items-center">
+    <section id="top" className="min-h-screen flex flex-col justify-center pt-28 md:pt-[184px] pb-20 relative">
+      <div className="max-w-[1280px] mx-auto px-4 md:px-8 relative z-[2] w-full">
+        <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_1fr] gap-8 lg:gap-20 items-center">
 
           {/* left */}
           <div>
-            <div className="flex items-center gap-4 mb-10 font-mono text-[11px] text-[#9A9288] tracking-wider">
+            <div className="flex items-center gap-4 mb-8 md:mb-10 font-mono text-[11px] text-[#9A9288] tracking-wider">
               <span>UNDERHAUS / AI UNDERWRITING</span>
               <span className="w-6 h-px bg-[rgba(26,24,20,0.16)]" />
-              <span>v0.9 — ALL US MARKETS</span>
+              <span className="hidden sm:inline">v0.9 — ALL US MARKETS</span>
             </div>
 
-            <h1 className="font-['Instrument_Serif'] text-[clamp(56px,9vw,116px)] leading-[0.98] tracking-[-0.015em] mb-8" aria-label="An AI that underwrites every listing before you tour.">
+            <h1 className="font-['Instrument_Serif'] text-[clamp(38px,8vw,116px)] leading-[0.98] tracking-[-0.015em] mb-7 md:mb-8" aria-label="An AI that underwrites every listing before you tour.">
               {WORDS.map((word, i) => {
                 if (word === null) return <span key={i} className="block h-0" />
                 const isItalic = i === 3
@@ -65,12 +66,12 @@ export default function Hero() {
               })}
             </h1>
 
-            <p className={`max-w-[560px] text-xl leading-relaxed text-[#5C564E] mb-10 transition-all duration-700 ${subIn ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}>
+            <p className={`max-w-[560px] text-lg md:text-xl leading-relaxed text-[#5C564E] mb-8 md:mb-10 transition-all duration-700 ${subIn ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}>
               Point Underhaus at your budget, your target markets, and the rules of thumb you actually use. It runs the rent comps, pulls the taxes, computes PITI, and hands you the deals that cash flow. No spreadsheets. No maybe.
             </p>
 
             <div style={{ display: 'flex', gap: 14, alignItems: 'center', flexWrap: 'wrap', transition: 'opacity 700ms, transform 700ms', transitionDelay: '120ms', opacity: ctasIn ? 1 : 0, transform: ctasIn ? 'none' : 'translateY(8px)' }}>
-              <a href="http://localhost:5175/signup"
+              <a href={`${APP_URL}/login`}
                 style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '12px 20px', background: '#1A1814', color: '#FAF7F2', fontSize: 14, fontWeight: 500, textDecoration: 'none', transition: 'background 200ms, transform 200ms' }}
                 onMouseEnter={e => { e.currentTarget.style.background = '#2A2620'; e.currentTarget.style.transform = 'translateY(-1px)' }}
                 onMouseLeave={e => { e.currentTarget.style.background = '#1A1814'; e.currentTarget.style.transform = 'none' }}>
@@ -84,10 +85,10 @@ export default function Hero() {
               </a>
             </div>
 
-            {/* trust */}
-            <div className={`mt-[72px] flex items-center gap-7 pt-7 border-t border-[rgba(26,24,20,0.08)] transition-opacity duration-700 delay-300 ${trustIn ? 'opacity-100' : 'opacity-0'}`}>
-              <span className="font-mono text-[11px] text-[#9A9288] tracking-widest uppercase whitespace-nowrap">Underwriting to date</span>
-              <div className="flex gap-10 flex-1">
+            {/* trust bar */}
+            <div className={`mt-14 md:mt-[72px] flex flex-wrap items-start gap-5 md:gap-7 pt-7 border-t border-[rgba(26,24,20,0.08)] transition-opacity duration-700 delay-300 ${trustIn ? 'opacity-100' : 'opacity-0'}`}>
+              <span className="font-mono text-[11px] text-[#9A9288] tracking-widest uppercase whitespace-nowrap pt-0.5">Underwriting to date</span>
+              <div className="flex flex-wrap gap-6 md:gap-10">
                 {[
                   { target: '48219', label: 'Listings analyzed', fmt: v => Math.round(v).toLocaleString() },
                   { target: '3.4', label: 'Gross value priced', prefix: '$', suffix: 'B' },
@@ -105,7 +106,7 @@ export default function Hero() {
           </div>
 
           {/* right — agent card */}
-          <div>
+          <div className="mt-4 lg:mt-0">
             <AgentCard visible={cardVisible} />
           </div>
         </div>

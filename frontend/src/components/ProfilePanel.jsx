@@ -1,6 +1,5 @@
 import { useState } from 'react'
 
-// ── Income: $10k steps up to $200k, then broader ────────────────────────────
 const INCOME_OPTIONS = [
   { label: 'Prefer not to say', value: '' },
   ...Array.from({ length: 20 }, (_, i) => {
@@ -19,7 +18,6 @@ const INCOME_OPTIONS = [
   { label: '$500k+', value: 500000 },
 ]
 
-// ── Down payment ─────────────────────────────────────────────────────────────
 const DOWN_OPTIONS = [
   { label: '3.5%', value: 3.5 },
   { label: '5%', value: 5 },
@@ -34,7 +32,6 @@ const DOWN_OPTIONS = [
   { label: 'Cash (100%)', value: 100 },
 ]
 
-// ── Credit score: numeric by 10s, mapped to backend range in payload ─────────
 const CREDIT_OPTIONS = [
   { label: 'Under 580', value: 570 },
   { label: '580', value: 580 },
@@ -73,7 +70,6 @@ const COC_OPTIONS = [4, 5, 6, 7, 8, 9, 10, 12, 15, 20]
 const VACANCY_OPTIONS = [0, 3, 5, 8, 10, 12, 15]
 const MGMT_OPTIONS = [0, 5, 8, 10, 12, 15]
 
-// ── Tooltip ──────────────────────────────────────────────────────────────────
 function Tip({ text }) {
   const [show, setShow] = useState(false)
   return (
@@ -111,7 +107,6 @@ function Tip({ text }) {
   )
 }
 
-// ── Select style ─────────────────────────────────────────────────────────────
 const sel = {
   width: '100%',
   padding: '8px 28px 8px 10px',
@@ -128,7 +123,6 @@ const sel = {
   outline: 'none',
 }
 
-// ── Field wrapper with optional tooltip ──────────────────────────────────────
 function Field({ label, tooltip, children }) {
   return (
     <div style={{ marginBottom: 14 }}>
@@ -141,8 +135,7 @@ function Field({ label, tooltip, children }) {
   )
 }
 
-// ── Main component ────────────────────────────────────────────────────────────
-export default function ProfilePanel({ user, profile, onChange, onSave, saved }) {
+export default function ProfilePanel({ user, profile, onChange, onSave, saved, onClose }) {
   const [advanced, setAdvanced] = useState(false)
 
   return (
@@ -154,10 +147,23 @@ export default function ProfilePanel({ user, profile, onChange, onSave, saved })
       borderRight: '1px solid rgba(26,24,20,0.08)',
       height: '100%',
       overflowY: 'auto',
+      background: '#FAF7F2',
     }}>
 
+      {/* Mobile close bar */}
+      {onClose && (
+        <div style={{ padding: '12px 20px', borderBottom: '1px solid rgba(26,24,20,0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
+          <span style={{ fontSize: 11, color: '#9A9288', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Investor Profile</span>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 6, color: '#9A9288', lineHeight: 0 }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M18 6L6 18M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+      )}
+
       {/* User card */}
-      <div style={{ padding: '24px 20px', borderBottom: '1px solid rgba(26,24,20,0.08)' }}>
+      <div style={{ padding: '20px', borderBottom: '1px solid rgba(26,24,20,0.08)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           {user?.avatar_url
             ? <img src={user.avatar_url} alt={user.name} style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(26,24,20,0.1)', flexShrink: 0 }} />
@@ -176,21 +182,15 @@ export default function ProfilePanel({ user, profile, onChange, onSave, saved })
 
       {/* Investor profile */}
       <div style={{ padding: '20px', flex: 1 }}>
-        <p style={{ fontSize: 11, color: '#9A9288', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 16 }}>Investor Profile</p>
+        {!onClose && <p style={{ fontSize: 11, color: '#9A9288', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 16 }}>Investor Profile</p>}
 
-        <Field
-          label="Annual Income"
-          tooltip="Your gross household income before taxes. Used to calculate your debt-to-income ratio and loan eligibility."
-        >
+        <Field label="Annual Income" tooltip="Your gross household income before taxes. Used to calculate your debt-to-income ratio and loan eligibility.">
           <select style={sel} value={profile.annual_income ?? ''} onChange={e => onChange('annual_income', e.target.value ? Number(e.target.value) : null)}>
             {INCOME_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
           </select>
         </Field>
 
-        <Field
-          label="Cash Available"
-          tooltip="Total cash you have set aside for the down payment. We'll use this to calculate your suggested max purchase price based on your down payment percentage."
-        >
+        <Field label="Cash Available" tooltip="Total cash you have set aside for the down payment. We'll use this to calculate your suggested max purchase price based on your down payment percentage.">
           <div style={{ position: 'relative' }}>
             <span style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', fontSize: 13, color: '#9A9288', pointerEvents: 'none' }}>$</span>
             <input
@@ -200,13 +200,7 @@ export default function ProfilePanel({ user, profile, onChange, onSave, saved })
               placeholder="e.g. 75000"
               value={profile.cash_amount ?? ''}
               onChange={e => onChange('cash_amount', e.target.value ? Number(e.target.value) : null)}
-              style={{
-                ...sel,
-                paddingLeft: 22,
-                backgroundImage: 'none',
-                width: '100%',
-                boxSizing: 'border-box',
-              }}
+              style={{ ...sel, paddingLeft: 22, backgroundImage: 'none', width: '100%', boxSizing: 'border-box' }}
             />
           </div>
           {profile.cash_amount && profile.down_payment_pct < 100 && (
@@ -216,46 +210,31 @@ export default function ProfilePanel({ user, profile, onChange, onSave, saved })
           )}
         </Field>
 
-        <Field
-          label="Down Payment"
-          tooltip="The upfront cash you put toward the purchase. Higher down payments reduce your loan amount and monthly mortgage costs."
-        >
+        <Field label="Down Payment" tooltip="The upfront cash you put toward the purchase. Higher down payments reduce your loan amount and monthly mortgage costs.">
           <select style={sel} value={profile.down_payment_pct} onChange={e => onChange('down_payment_pct', Number(e.target.value))}>
             {DOWN_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
           </select>
         </Field>
 
-        <Field
-          label="Credit Score"
-          tooltip="Your FICO credit score determines your mortgage interest rate. Higher scores get better rates — which directly improves your cash flow."
-        >
+        <Field label="Credit Score" tooltip="Your FICO credit score determines your mortgage interest rate. Higher scores get better rates — which directly improves your cash flow.">
           <select style={sel} value={profile.credit_score ?? 740} onChange={e => onChange('credit_score', Number(e.target.value))}>
             {CREDIT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
           </select>
         </Field>
 
-        <Field
-          label="Investment Goal"
-          tooltip="How you plan to use the property. House hacking adjusts rent estimates to account for you living in one unit. STR uses short-term rental income projections."
-        >
+        <Field label="Investment Goal" tooltip="How you plan to use the property. House hacking adjusts rent estimates to account for you living in one unit. STR uses short-term rental income projections.">
           <select style={sel} value={profile.investment_goal} onChange={e => onChange('investment_goal', e.target.value)}>
             {GOAL_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
           </select>
         </Field>
 
-        <Field
-          label="Monthly Debt Payments"
-          tooltip="Your existing monthly obligations — car loans, student loans, credit card minimums. This is used in your debt-to-income ratio to check loan eligibility."
-        >
+        <Field label="Monthly Debt Payments" tooltip="Your existing monthly obligations — car loans, student loans, credit card minimums. This is used in your debt-to-income ratio to check loan eligibility.">
           <select style={sel} value={profile.monthly_debt_payments} onChange={e => onChange('monthly_debt_payments', Number(e.target.value))}>
             {DEBT_OPTIONS.map(v => <option key={v} value={v}>{v === 0 ? 'None' : `$${v.toLocaleString()}/mo`}</option>)}
           </select>
         </Field>
 
-        <Field
-          label="Target Cash-on-Cash"
-          tooltip="The minimum annual return on your invested cash you'll accept. Example: at 8%, every $100k you invest should return $8k/year in cash flow. Deals below this get a NO GO verdict."
-        >
+        <Field label="Target Cash-on-Cash" tooltip="The minimum annual return on your invested cash you'll accept. Example: at 8%, every $100k you invest should return $8k/year in cash flow. Deals below this get a NO GO verdict.">
           <select style={sel} value={profile.target_cash_on_cash_pct} onChange={e => onChange('target_cash_on_cash_pct', Number(e.target.value))}>
             {COC_OPTIONS.map(v => <option key={v} value={v}>{v}%</option>)}
           </select>
@@ -275,37 +254,25 @@ export default function ProfilePanel({ user, profile, onChange, onSave, saved })
 
         {advanced && (
           <div style={{ animation: 'fadeIn 200ms ease both' }}>
-            <Field
-              label="Vacancy Rate"
-              tooltip="The % of time the unit sits empty between tenants. Default 8% ≈ about 1 month per year. Higher for competitive markets, lower for tight ones."
-            >
+            <Field label="Vacancy Rate" tooltip="The % of time the unit sits empty between tenants. Default 8% ≈ about 1 month per year. Higher for competitive markets, lower for tight ones.">
               <select style={sel} value={profile.vacancy_rate_pct} onChange={e => onChange('vacancy_rate_pct', Number(e.target.value))}>
                 {VACANCY_OPTIONS.map(v => <option key={v} value={v}>{v}%</option>)}
               </select>
             </Field>
 
-            <Field
-              label="Management Fee"
-              tooltip="What a property manager charges, as a % of monthly rent. Set to 0% (Self-managed) if you'll handle it yourself. Typical range is 8–12%."
-            >
+            <Field label="Management Fee" tooltip="What a property manager charges, as a % of monthly rent. Set to 0% (Self-managed) if you'll handle it yourself. Typical range is 8–12%.">
               <select style={sel} value={profile.management_fee_pct} onChange={e => onChange('management_fee_pct', Number(e.target.value))}>
                 {MGMT_OPTIONS.map(v => <option key={v} value={v}>{v === 0 ? 'Self-managed (0%)' : `${v}%`}</option>)}
               </select>
             </Field>
 
-            <Field
-              label="Maintenance Reserve"
-              tooltip="Monthly cash set aside for routine repairs — leaky faucets, appliances, paint. Typically 1–5% of property value per year. Prevents being caught off guard."
-            >
+            <Field label="Maintenance Reserve" tooltip="Monthly cash set aside for routine repairs — leaky faucets, appliances, paint. Typically 1–5% of property value per year. Prevents being caught off guard.">
               <select style={sel} value={profile.maintenance_pct} onChange={e => onChange('maintenance_pct', Number(e.target.value))}>
                 {[1, 2, 3, 5, 7, 10].map(v => <option key={v} value={v}>{v}%</option>)}
               </select>
             </Field>
 
-            <Field
-              label="CapEx Reserve"
-              tooltip="Capital expenditure reserve — funds for big-ticket replacements like roof, HVAC, water heater, windows. Set aside monthly so you're never caught short."
-            >
+            <Field label="CapEx Reserve" tooltip="Capital expenditure reserve — funds for big-ticket replacements like roof, HVAC, water heater, windows. Set aside monthly so you're never caught short.">
               <select style={sel} value={profile.capex_pct} onChange={e => onChange('capex_pct', Number(e.target.value))}>
                 {[1, 2, 3, 5, 7, 10].map(v => <option key={v} value={v}>{v}%</option>)}
               </select>

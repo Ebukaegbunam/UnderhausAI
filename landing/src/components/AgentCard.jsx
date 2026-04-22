@@ -64,7 +64,7 @@ export default function AgentCard({ visible }) {
   return (
     <div style={{
       background: '#F3EEE4', border: '1px solid rgba(26,24,20,0.08)',
-      padding: 28, display: 'flex', flexDirection: 'column', minHeight: 520,
+      padding: 28, display: 'flex', flexDirection: 'column', minHeight: 320,
       opacity: visible ? 1 : 0, transform: visible ? 'none' : 'translateY(10px)',
       transition: 'opacity 800ms cubic-bezier(0.16,1,0.3,1), transform 800ms cubic-bezier(0.16,1,0.3,1)',
     }}>

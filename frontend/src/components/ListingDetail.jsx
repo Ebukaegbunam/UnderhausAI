@@ -100,7 +100,7 @@ export default function ListingDetail({ listing, onClose, onDeepUnderwrite }) {
           </div>
 
           {/* Property stats */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 24 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', gap: 10, marginBottom: 24 }}>
             {[
               { label: 'Beds', value: listing.beds ?? '—' },
               { label: 'Baths', value: listing.baths ?? '—' },

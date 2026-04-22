@@ -10,10 +10,10 @@ const NAV_HREFS = { 'How it works': '#how', 'Pricing': '#pricing' }
 
 export default function Footer() {
   return (
-    <footer className="border-t border-[rgba(26,24,20,0.08)] pt-[72px] pb-10 relative z-[2]" style={{ background: '#F3EEE4' }}>
-      <div className="max-w-[1280px] mx-auto px-8">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-12">
-          <div>
+    <footer className="border-t border-[rgba(26,24,20,0.08)] pt-12 md:pt-[72px] pb-10 relative z-[2]" style={{ background: '#F3EEE4' }}>
+      <div className="max-w-[1280px] mx-auto px-4 md:px-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
+          <div className="col-span-2 md:col-span-1">
             <a href="#top" className="flex items-center gap-2.5" style={{ color: '#1A1814', textDecoration: 'none' }}>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                 <path d="M3 10 L12 2 L21 10 L21 22 L3 22 Z" stroke="currentColor" strokeWidth="1.75" strokeLinejoin="round"/>
@@ -48,9 +48,9 @@ export default function Footer() {
           ))}
         </div>
 
-        <div className="mt-[72px] pt-7 border-t border-[rgba(26,24,20,0.08)] flex justify-between items-center font-mono text-[11px] text-[#9A9288] tracking-wider">
+        <div className="mt-12 md:mt-[72px] pt-7 border-t border-[rgba(26,24,20,0.08)] flex flex-wrap justify-between items-center gap-3 font-mono text-[11px] text-[#9A9288] tracking-wider">
           <span>© 2026 UNDERHAUS LABS, INC.</span>
-          <span>BUILT FOR THE US MARKET · SHIPPED FROM EVERYWHERE</span>
+          <span className="hidden sm:inline">BUILT FOR THE US MARKET · SHIPPED FROM EVERYWHERE</span>
         </div>
       </div>
     </footer>
